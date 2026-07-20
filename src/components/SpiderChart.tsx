@@ -30,14 +30,14 @@ function wrapLabel(label: string): string[] {
 
 export function SpiderChart({
   axes,
-  size = 420,
+  size = 440,
 }: {
   axes: SpiderAxis[];
   size?: number;
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  const radius = size / 2 - 92; // room for wrapped labels
+  const radius = size / 2 - 126; // small grid, generous margin for labels
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -45,6 +45,13 @@ export function SpiderChart({
   const point = (i: number, r: number) => {
     const a = angleFor(i);
     return [cx + Math.cos(a) * radius * r, cy + Math.sin(a) * radius * r] as const;
+  };
+  // Labels sit a fixed gap OUTSIDE the outer ring so they never touch the
+  // grid or the value polygon.
+  const labelPoint = (i: number) => {
+    const a = angleFor(i);
+    const r = radius + 30;
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as const;
   };
 
   const valuePoints = axes
@@ -93,10 +100,10 @@ export function SpiderChart({
         );
       })}
 
-      {/* Labels */}
+      {/* Labels — placed outside the grid */}
       {axes.map((ax, i) => {
-        const [x, y] = point(i, 1.14);
-        const anchor = Math.abs(x - cx) < 10 ? "middle" : x > cx ? "start" : "end";
+        const [x, y] = labelPoint(i);
+        const anchor = Math.abs(x - cx) < 12 ? "middle" : x > cx ? "start" : "end";
         const lines = wrapLabel(ax.label);
         const y0 = y - ((lines.length - 1) * 13) / 2;
         return (
