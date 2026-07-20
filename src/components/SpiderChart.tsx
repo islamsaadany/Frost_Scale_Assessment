@@ -37,7 +37,10 @@ export function SpiderChart({
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  const radius = size / 2 - 126; // small grid, generous margin for labels
+  // Margins scale with size so labels stay outside the grid at any size.
+  const margin = Math.round(size * 0.27);
+  const radius = size / 2 - margin;
+  const labelGap = Math.round(size * 0.055);
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -50,7 +53,7 @@ export function SpiderChart({
   // grid or the value polygon.
   const labelPoint = (i: number) => {
     const a = angleFor(i);
-    const r = radius + 30;
+    const r = radius + labelGap;
     return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as const;
   };
 
