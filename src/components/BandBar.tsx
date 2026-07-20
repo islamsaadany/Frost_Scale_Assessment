@@ -1,4 +1,4 @@
-import { BAND_BG } from "@/data/constants";
+import { BAND_HEX } from "@/data/constants";
 import type { BandId } from "@/data/dimensions";
 
 interface Seg {
@@ -10,14 +10,16 @@ interface Seg {
 
 // The 4-segment band bar from the booklet's "كيفية التصحيح" pages.
 // Segments run منخفض → مرضية شديدة; in RTL the first (منخفض) sits on the
-// right, matching the booklet. The respondent's band is highlighted; the
-// others are dimmed.
+// right. The respondent's band is highlighted; the others are dimmed.
+// Colours come from `colors` so the report's palette toggle applies here.
 export function BandBar({
   bands,
   activeBand,
+  colors = BAND_HEX,
 }: {
   bands: Seg[];
   activeBand: BandId;
+  colors?: Record<string, string>;
 }) {
   return (
     <div>
@@ -42,11 +44,8 @@ export function BandBar({
         {bands.map((b) => (
           <div
             key={b.band}
-            className={[
-              "flex-1 transition",
-              BAND_BG[b.band],
-              b.band === activeBand ? "" : "opacity-30",
-            ].join(" ")}
+            className={"flex-1 transition " + (b.band === activeBand ? "" : "opacity-30")}
+            style={{ backgroundColor: colors[b.band] }}
           />
         ))}
       </div>

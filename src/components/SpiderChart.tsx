@@ -31,9 +31,11 @@ function wrapLabel(label: string): string[] {
 export function SpiderChart({
   axes,
   size = 440,
+  colors = BAND_HEX,
 }: {
   axes: SpiderAxis[];
   size?: number;
+  colors?: Record<string, string>;
 }) {
   const cx = size / 2;
   const cy = size / 2;
@@ -97,7 +99,7 @@ export function SpiderChart({
       {/* Vertices — colored by band so highs/severes pop */}
       {axes.map((ax, i) => {
         const [x, y] = point(i, Math.max(0.04, ax.fraction));
-        const fill = ax.band ? BAND_HEX[ax.band] : "#B96C34";
+        const fill = ax.band ? colors[ax.band] : "#B96C34";
         return (
           <circle key={i} cx={x} cy={y} r={5.5} fill={fill} stroke="#fff" strokeWidth={1.5} />
         );
