@@ -46,6 +46,12 @@ npm run dev
 The seed creates a demo access code **`FROST1`** so you can walk the take
 flow immediately.
 
+## Deploying
+
+See [`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md) for Vercel — provision
+Postgres, set `DATABASE_URL` / `DATABASE_URL_UNPOOLED` / `AUTH_SECRET`, run
+`prisma db push` + `npm run seed` once against the production DB, then deploy.
+
 ## Project structure
 
 ```

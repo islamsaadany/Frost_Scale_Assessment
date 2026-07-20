@@ -11,11 +11,17 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "native" for local dev; the rhel target matches Vercel's serverless
+  // runtime (AWS Linux, OpenSSL 3).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
+  // Pooled connection used at runtime (serverless-safe). On Vercel Postgres
+  // set this to POSTGRES_PRISMA_URL; on the Neon integration it is DATABASE_URL.
   url       = env("DATABASE_URL")
+  // Direct (unpooled) connection used only by `prisma db push` / migrations.
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
