@@ -143,9 +143,9 @@ export function AdminClient() {
                 <tbody>
                   {codes.map((c) => (
                     <tr key={c.id} className="border-b border-canvas-muted/60">
-                      <td className="ltr-nums py-2 font-bold text-brand-dark">{c.code}</td>
+                      <td className="ltr-nums py-2 text-right font-bold text-brand-dark">{c.code}</td>
                       <td className="py-2 text-ink-soft">{c.description || "—"}</td>
-                      <td className="ltr-nums py-2 text-ink-soft">
+                      <td className="ltr-nums py-2 text-right text-ink-soft">
                         {c.currentUses} / {c.maxUses}
                       </td>
                       <td className="py-2">
@@ -200,8 +200,8 @@ export function AdminClient() {
                   {sessions.map((s) => (
                     <tr key={s.id} className="border-b border-canvas-muted/60">
                       <td className="py-2 font-medium text-ink">{s.name || "—"}</td>
-                      <td className="ltr-nums py-2 text-ink-soft">{s.accessCode?.code ?? "—"}</td>
-                      <td className="ltr-nums py-2 text-ink-soft">{s.totalScore ?? "—"}</td>
+                      <td className="ltr-nums py-2 text-right text-ink-soft">{s.accessCode?.code ?? "—"}</td>
+                      <td className="ltr-nums py-2 text-right text-ink-soft">{s.totalScore ?? "—"}</td>
                       <td className="py-2">
                         {s.totalBand && (
                           <span
@@ -211,7 +211,7 @@ export function AdminClient() {
                           </span>
                         )}
                       </td>
-                      <td className="ltr-nums py-2 text-xs text-ink-muted">
+                      <td className="ltr-nums py-2 text-right text-xs text-ink-muted">
                         {s.submittedAt
                           ? new Date(s.submittedAt).toLocaleDateString("ar-EG")
                           : "—"}

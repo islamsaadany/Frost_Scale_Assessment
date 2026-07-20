@@ -5,9 +5,9 @@ import { PrintButton } from "@/components/PrintButton";
 import { BandBar } from "@/components/BandBar";
 import { DimensionPill } from "@/components/DimensionPill";
 import { PageHeader, BrandMark } from "@/components/BrandMark";
-import { BAND_BG, BAND_TEXT_ON } from "@/data/constants";
-import { BANDS } from "@/data/dimensions";
-import { SCORING_NOTES, SCORING_TITLE, TOTAL_LABEL } from "@/data/report-content";
+import { BAND_BG, BAND_TEXT_ON, BAND_HEX } from "@/data/constants";
+import { BANDS, BAND_ORDER } from "@/data/dimensions";
+import { TOTAL_LABEL } from "@/data/report-content";
 
 export const metadata = { title: "نتيجتك — مقياس فروست" };
 export const dynamic = "force-dynamic";
@@ -19,6 +19,32 @@ function BandChip({ band, label }: { band: string; label: string }) {
     >
       {label}
     </span>
+  );
+}
+
+function BigScore({ raw, max }: { raw: number; max: number }) {
+  return (
+    <div className="ltr-nums flex items-baseline gap-1 text-brand-dark">
+      <span className="text-3xl font-extrabold leading-none sm:text-4xl">{raw}</span>
+      <span className="text-base font-medium text-ink-muted">/ {max}</span>
+    </div>
+  );
+}
+
+// Band legend, mirroring the STP report's colour key.
+function BandLegend() {
+  return (
+    <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+      {BAND_ORDER.map((b) => (
+        <span key={b} className="flex items-center gap-1.5 text-xs text-ink-soft">
+          <span
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ backgroundColor: BAND_HEX[b] }}
+          />
+          {BANDS[b].label}
+        </span>
+      ))}
+    </div>
   );
 }
 
@@ -88,18 +114,23 @@ export default async function ReportPage({
           <h2 className="text-base font-bold text-ink sm:text-lg">{TOTAL_LABEL}</h2>
           <BandChip band={report.total.band} label={report.total.bandLabel} />
         </div>
-        <p className="ltr-nums mb-3 text-sm text-ink-muted">
-          {report.total.raw} / {report.total.max}
-        </p>
+        <div className="mb-4">
+          <BigScore raw={report.total.raw} max={report.total.max} />
+        </div>
         <BandBar bands={totalSegs} activeBand={report.total.band} />
       </section>
 
-      {/* Spider chart */}
+      {/* Spider chart + band legend */}
       <section className="card mt-6 p-6 sm:p-8">
         <h2 className="mb-4 text-center text-base font-bold text-ink sm:text-lg">ملفك عبر الأبعاد</h2>
         <SpiderChart
-          axes={report.dimensions.map((d) => ({ label: d.shortName, fraction: d.fraction }))}
+          axes={report.dimensions.map((d) => ({
+            label: d.shortName,
+            fraction: d.fraction,
+            band: d.band,
+          }))}
         />
+        <BandLegend />
       </section>
 
       {/* Per-dimension breakdown */}
@@ -107,28 +138,21 @@ export default async function ReportPage({
         {report.dimensions.map((d) => (
           <article key={d.id} className="card p-6">
             <div className="mb-4 flex flex-col items-center gap-2 text-center">
-              <DimensionPill arabic={d.shortName} english={d.english} />
+              <div className="flex items-center gap-2">
+                <span className="ltr-nums flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-soft text-sm font-extrabold text-brand-dark">
+                  {d.order}
+                </span>
+                <DimensionPill arabic={d.shortName} english={d.english} />
+              </div>
               <p className="text-xs text-ink-muted">{d.interpretation}</p>
             </div>
-            <div className="mb-3 flex items-center justify-between">
-              <span className="ltr-nums text-sm text-ink-muted">
-                {d.raw} / {d.max}
-              </span>
+            <div className="mb-3 flex items-end justify-between">
+              <BigScore raw={d.raw} max={d.max} />
               <BandChip band={d.band} label={d.bandLabel} />
             </div>
             <BandBar bands={d.bands} activeBand={d.band} />
           </article>
         ))}
-      </section>
-
-      {/* Scoring key — verbatim from the booklet */}
-      <section className="card mt-6 bg-canvas-muted/60 p-6">
-        <h2 className="mb-3 text-base font-bold text-ink">{SCORING_TITLE}</h2>
-        <ul className="list-inside list-disc space-y-2 text-sm leading-relaxed text-ink-soft">
-          {SCORING_NOTES.map((note, i) => (
-            <li key={i}>{note}</li>
-          ))}
-        </ul>
       </section>
     </main>
   );
