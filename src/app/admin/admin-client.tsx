@@ -86,9 +86,14 @@ export function AdminClient() {
     <main className="mx-auto max-w-4xl px-4 py-10">
       <header className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink">لوحة الإدارة</h1>
-        <button onClick={logout} className="btn-ghost">
-          خروج
-        </button>
+        <div className="flex items-center gap-3">
+          <a href="/admin/settings" className="btn-ghost">
+            الإعدادات
+          </a>
+          <button onClick={logout} className="btn-ghost">
+            خروج
+          </button>
+        </div>
       </header>
 
       {loading ? (
