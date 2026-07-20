@@ -1,25 +1,14 @@
-"use client";
-
-import { useState } from "react";
 import { SpiderChart } from "@/components/SpiderChart";
 import { BandBar } from "@/components/BandBar";
 import { PrintButton } from "@/components/PrintButton";
 import { PageHeader } from "@/components/BrandMark";
-import {
-  BAND_PALETTES,
-  PALETTE_LABELS,
-  textOn,
-  type PaletteId,
-} from "@/data/constants";
+import { BAND_PALETTES, textOn } from "@/data/constants";
 import { BAND_ORDER, BANDS } from "@/data/dimensions";
 import { TOTAL_LABEL } from "@/data/report-content";
 import { TOTAL_BAND_RANGES, type ReportData } from "@/lib/report";
 
-const SCHEMES: PaletteId[] = ["warm", "severity"];
-
 export function ReportView({ report }: { report: ReportData }) {
-  const [scheme, setScheme] = useState<PaletteId>("warm");
-  const colors = BAND_PALETTES[scheme];
+  const colors = BAND_PALETTES.severity;
 
   const chip = (band: string, label: string) => (
     <span
@@ -86,24 +75,7 @@ export function ReportView({ report }: { report: ReportData }) {
             {report.name && <p className="text-lg font-bold text-ink">{report.name}</p>}
             {dateStr && <p className="ltr-nums text-xs text-ink-muted">{dateStr}</p>}
           </div>
-          <div className="flex items-center gap-3">
-            {/* Colour-scheme toggle */}
-            <div className="flex items-center gap-1 rounded-xl border border-canvas-muted bg-white p-1 print:hidden">
-              {SCHEMES.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setScheme(s)}
-                  className={
-                    "rounded-lg px-3 py-1.5 text-xs font-bold transition " +
-                    (scheme === s ? "bg-brand text-white" : "text-ink-soft hover:bg-canvas-muted")
-                  }
-                >
-                  {PALETTE_LABELS[s]}
-                </button>
-              ))}
-            </div>
-            <PrintButton />
-          </div>
+          <PrintButton />
         </div>
       </header>
 

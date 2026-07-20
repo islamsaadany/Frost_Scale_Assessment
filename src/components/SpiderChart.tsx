@@ -39,10 +39,11 @@ export function SpiderChart({
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  // Margins scale with size so labels stay outside the grid at any size.
-  const margin = Math.round(size * 0.27);
+  // Margins scale with size so labels stay well outside the grid at any
+  // size — even when a vertex sits on the outer ring (fraction 1.0).
+  const margin = Math.round(size * 0.32);
   const radius = size / 2 - margin;
-  const labelGap = Math.round(size * 0.055);
+  const labelGap = Math.round(size * 0.1);
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -105,12 +106,16 @@ export function SpiderChart({
         );
       })}
 
-      {/* Labels — placed outside the grid */}
+      {/* Labels — placed outside the grid. Multi-line labels are anchored
+          away from the centre (up above the chart, down below it) so their
+          inner line never reaches back toward the vertices. */}
       {axes.map((ax, i) => {
         const [x, y] = labelPoint(i);
         const anchor = Math.abs(x - cx) < 12 ? "middle" : x > cx ? "start" : "end";
         const lines = wrapLabel(ax.label);
-        const y0 = y - ((lines.length - 1) * 13) / 2;
+        const lineH = 13;
+        const extra = (lines.length - 1) * lineH;
+        const y0 = y < cy - 6 ? y - extra : y > cy + 6 ? y : y - extra / 2;
         return (
           <text
             key={i}
