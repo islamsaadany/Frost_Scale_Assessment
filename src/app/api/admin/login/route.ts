@@ -3,27 +3,35 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { setSessionCookie } from "@/lib/auth";
 
-// POST /api/admin/login  Body: { email, password }
+// POST /api/admin/login  Body: { password }
+// Password-only access: match the password against any active admin.
 export async function POST(req: Request) {
-  let body: { email?: string; password?: string };
+  let body: { password?: string };
   try {
     body = (await req.json()) as typeof body;
   } catch {
     return NextResponse.json({ error: "طلب غير صالح." }, { status: 400 });
   }
 
-  const email = (body.email ?? "").trim().toLowerCase();
   const password = body.password ?? "";
-  if (!email || !password) {
-    return NextResponse.json({ error: "البريد وكلمة المرور مطلوبان." }, { status: 400 });
+  if (!password) {
+    return NextResponse.json({ error: "كلمة المرور مطلوبة." }, { status: 400 });
   }
 
-  const admin = await prisma.admin.findUnique({ where: { email } });
-  const ok = admin && admin.isActive && (await bcrypt.compare(password, admin.passwordHash));
-  if (!ok || !admin) {
-    return NextResponse.json({ error: "بيانات الدخول غير صحيحة." }, { status: 401 });
+  const admins = await prisma.admin.findMany({ where: { isActive: true } });
+
+  let matched: (typeof admins)[number] | null = null;
+  for (const a of admins) {
+    if (await bcrypt.compare(password, a.passwordHash)) {
+      matched = a;
+      break;
+    }
   }
 
-  await setSessionCookie(admin.id);
+  if (!matched) {
+    return NextResponse.json({ error: "كلمة المرور غير صحيحة." }, { status: 401 });
+  }
+
+  await setSessionCookie(matched.id);
   return NextResponse.json({ ok: true });
 }
