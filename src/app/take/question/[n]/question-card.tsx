@@ -209,9 +209,13 @@ export function QuestionCard({
 
       <SectionRail activeId={activeDimension} />
 
-      <h2 className="min-h-[4.5rem] text-center text-2xl font-bold leading-relaxed text-ink sm:text-3xl">
-        {questionText}
-      </h2>
+      {/* Fixed-height, vertically-centered so the rating below never shifts
+          between questions, regardless of how many lines the text takes. */}
+      <div className="flex h-40 items-center justify-center sm:h-44">
+        <h2 className="text-center text-2xl font-bold leading-relaxed text-ink sm:text-3xl">
+          {questionText}
+        </h2>
+      </div>
 
       {/* Likert — bubble row like the booklet. Value 1 sits on the right (RTL). */}
       <div className="flex justify-between gap-1 sm:gap-2">
