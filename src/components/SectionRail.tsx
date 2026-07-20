@@ -1,39 +1,31 @@
 import { DIMENSIONS, DIMENSIONS_BY_ID, type DimensionId } from "@/data/dimensions";
+import { DimensionPill } from "@/components/DimensionPill";
 
-// All 7 dimensions shown together as numbered chips. The active one is
-// orange; the rest are faded — so the respondent sees where they are in
-// the overall scale as they move between sections.
+// Compact section indicator: the current dimension shows as a full orange
+// pill (Arabic + English); the other six appear as small numbered dots —
+// tinted for the ones already passed, faded for the ones still ahead.
 export function SectionRail({ activeId }: { activeId: DimensionId }) {
-  const active = DIMENSIONS_BY_ID[activeId];
+  const activeOrder = DIMENSIONS_BY_ID[activeId].order;
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap justify-center gap-1.5">
-        {DIMENSIONS.map((d) => {
-          const isActive = d.id === activeId;
-          return (
-            <span
-              key={d.id}
-              className={
-                "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition " +
-                (isActive
-                  ? "bg-brand font-bold text-white shadow-sm"
-                  : "bg-canvas-muted text-ink-muted")
-              }
-            >
-              <span
-                className={
-                  "ltr-nums flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold " +
-                  (isActive ? "bg-white/25 text-white" : "bg-white text-ink-muted")
-                }
-              >
-                {d.order}
-              </span>
-              {d.shortName}
-            </span>
-          );
-        })}
-      </div>
-      <p className="text-center text-[11px] font-medium text-brand-dark">{active.english}</p>
+    <div className="flex flex-wrap items-center justify-center gap-2">
+      {DIMENSIONS.map((d) => {
+        if (d.id === activeId) {
+          return <DimensionPill key={d.id} arabic={d.shortName} english={d.english} />;
+        }
+        const done = d.order < activeOrder;
+        return (
+          <span
+            key={d.id}
+            title={d.shortName}
+            className={
+              "ltr-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition " +
+              (done ? "bg-brand/15 text-brand-dark" : "bg-canvas-muted text-ink-muted")
+            }
+          >
+            {d.order}
+          </span>
+        );
+      })}
     </div>
   );
 }
