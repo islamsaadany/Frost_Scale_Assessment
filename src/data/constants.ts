@@ -44,3 +44,38 @@ export const BAND_HEX: Record<string, string> = {
   high: "#CA6316",
   severe: "#542D12",
 };
+
+// Two selectable colour schemes for the report:
+//  - warm     : the booklet's terracotta ramp (cream → brown)
+//  - severity : green → red, reading low → high as a risk gradient
+export type PaletteId = "warm" | "severity";
+
+export const BAND_PALETTES: Record<PaletteId, Record<string, string>> = {
+  warm: {
+    low: "#F4DEBE",
+    mid: "#EDAF66",
+    high: "#CA6316",
+    severe: "#542D12",
+  },
+  severity: {
+    low: "#4E9A5A", // green
+    mid: "#E3B23C", // amber
+    high: "#E07B2E", // orange
+    severe: "#C0392B", // red
+  },
+};
+
+export const PALETTE_LABELS: Record<PaletteId, string> = {
+  warm: "الألوان الأصلية",
+  severity: "أخضر ← أحمر",
+};
+
+// Pick a legible text colour (ink or white) for a given background hex.
+export function textOn(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.62 ? "#2A2521" : "#FFFFFF";
+}
