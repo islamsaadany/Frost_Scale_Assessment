@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LIKERT_OPTIONS } from "@/data/constants";
-import { DimensionPill } from "@/components/DimensionPill";
+import type { DimensionId } from "@/data/dimensions";
+import { SectionRail } from "@/components/SectionRail";
 import {
   findInFlightSessionId,
   loadCachedAnswers,
@@ -15,8 +16,7 @@ import {
 interface QuestionCardProps {
   position: number;
   total: number;
-  dimArabic: string;
-  dimEnglish: string;
+  activeDimension: DimensionId;
   questionId: number;
   questionText: string;
 }
@@ -24,8 +24,7 @@ interface QuestionCardProps {
 export function QuestionCard({
   position,
   total,
-  dimArabic,
-  dimEnglish,
+  activeDimension,
   questionId,
   questionText,
 }: QuestionCardProps) {
@@ -208,9 +207,7 @@ export function QuestionCard({
         </div>
       </div>
 
-      <div className="flex justify-center">
-        <DimensionPill arabic={dimArabic} english={dimEnglish} />
-      </div>
+      <SectionRail activeId={activeDimension} />
 
       <h2 className="min-h-[4.5rem] text-center text-2xl font-bold leading-relaxed text-ink sm:text-3xl">
         {questionText}

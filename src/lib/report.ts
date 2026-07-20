@@ -15,6 +15,7 @@ import { computeScores } from "@/lib/scoring";
 
 export interface ReportDimension {
   id: DimensionId;
+  order: number;
   name: string;
   shortName: string;
   english: string;
@@ -81,6 +82,7 @@ export function buildReport(session: StoredSession): ReportData {
     const fraction = Math.min(1, Math.max(0, (raw - dim.min) / span));
     return {
       id: dim.id,
+      order: dim.order,
       name: dim.name,
       shortName: dim.shortName,
       english: dim.english,

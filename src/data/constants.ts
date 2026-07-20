@@ -35,3 +35,11 @@ export const BAND_TEXT_ON: Record<string, string> = {
   high: "text-white",
   severe: "text-white",
 };
+
+// Hex equivalents of the band palette, for SVG (spider chart, legend).
+export const BAND_HEX: Record<string, string> = {
+  low: "#F5E0C6",
+  mid: "#E7A170",
+  high: "#D9772F",
+  severe: "#5E3418",
+};

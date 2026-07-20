@@ -1,13 +1,15 @@
 "use client";
 
+import { BAND_HEX } from "@/data/constants";
+import type { BandId } from "@/data/dimensions";
+
 export interface SpiderAxis {
   label: string;
   /** 0..1 */
   fraction: number;
+  band?: BandId;
 }
 
-// A dependency-free radar/spider chart. Renders N axes evenly around a
-// circle, with concentric grid rings and a filled value polygon.
 // Split a long Arabic label into at most two balanced lines so wide names
 // (e.g. "الشكوك بشأن التصرفات") don't collide with their neighbours.
 function wrapLabel(label: string): string[] {
@@ -28,20 +30,18 @@ function wrapLabel(label: string): string[] {
 
 export function SpiderChart({
   axes,
-  size = 340,
+  size = 420,
 }: {
   axes: SpiderAxis[];
   size?: number;
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  const radius = size / 2 - 78; // leave room for wrapped labels
+  const radius = size / 2 - 92; // room for wrapped labels
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
-  // Start at the top (−90°) and go clockwise.
   const angleFor = (i: number) => (Math.PI * 2 * i) / n - Math.PI / 2;
-
   const point = (i: number, r: number) => {
     const a = angleFor(i);
     return [cx + Math.cos(a) * radius * r, cy + Math.sin(a) * radius * r] as const;
@@ -82,18 +82,23 @@ export function SpiderChart({
       })}
 
       {/* Value polygon */}
-      <polygon points={valuePoints} fill="#D9884A" fillOpacity={0.28} stroke="#B96C34" strokeWidth={2} />
+      <polygon points={valuePoints} fill="#D9884A" fillOpacity={0.22} stroke="#B96C34" strokeWidth={2} />
+
+      {/* Vertices — colored by band so highs/severes pop */}
       {axes.map((ax, i) => {
         const [x, y] = point(i, Math.max(0.04, ax.fraction));
-        return <circle key={i} cx={x} cy={y} r={3.5} fill="#B96C34" />;
+        const fill = ax.band ? BAND_HEX[ax.band] : "#B96C34";
+        return (
+          <circle key={i} cx={x} cy={y} r={5.5} fill={fill} stroke="#fff" strokeWidth={1.5} />
+        );
       })}
 
-      {/* Labels (wrapped to ≤2 lines, pushed outside the grid) */}
+      {/* Labels */}
       {axes.map((ax, i) => {
         const [x, y] = point(i, 1.14);
         const anchor = Math.abs(x - cx) < 10 ? "middle" : x > cx ? "start" : "end";
         const lines = wrapLabel(ax.label);
-        const y0 = y - ((lines.length - 1) * 12) / 2;
+        const y0 = y - ((lines.length - 1) * 13) / 2;
         return (
           <text
             key={i}
@@ -101,12 +106,12 @@ export function SpiderChart({
             y={y0}
             textAnchor={anchor}
             dominantBaseline="middle"
-            fontSize={10.5}
+            fontSize={12}
             fill="#5A5149"
             fontWeight={700}
           >
             {lines.map((ln, li) => (
-              <tspan key={li} x={x} dy={li === 0 ? 0 : 12}>
+              <tspan key={li} x={x} dy={li === 0 ? 0 : 13}>
                 {ln}
               </tspan>
             ))}
