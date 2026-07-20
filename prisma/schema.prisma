@@ -1,0 +1,101 @@
+// Prisma schema for مقياس فروست (Frost Multidimensional Perfectionism Scale).
+//
+// Design notes:
+//  - Questions, dimensions, band thresholds, and report copy are FIXED
+//    content and live in `src/data/*` — they are NOT stored in the DB.
+//  - The DB stores only operational data: admins, access codes, respondent
+//    sessions, and their raw answers.
+//  - Access is code-gated (STP-style): an admin issues an AccessCode, a
+//    respondent validates it to open a Session, answers 35 items, and gets
+//    an individual report. No cohort aggregation.
+
+generator client {
+  provider = "prisma-client-js"
+  // "native" for local dev; the rhel target matches Vercel's serverless
+  // runtime (AWS Linux, OpenSSL 3).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  // Pooled connection used at runtime (serverless-safe). On Vercel Postgres
+  // set this to POSTGRES_PRISMA_URL; on the Neon integration it is DATABASE_URL.
+  url       = env("DATABASE_URL")
+  // Direct (unpooled) connection used only by `prisma db push` / migrations.
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Access codes (STP-style gating) ─────────────────────────────────
+
+model AccessCode {
+  id          String    @id @default(uuid())
+  // 6 chars over an alphabet that excludes 0/O/1/I/L. Stored uppercased.
+  code        String    @unique
+  description String    @default("")
+  // Hard cap on the number of sessions that can be opened with this code.
+  maxUses     Int       @default(1)
+  currentUses Int       @default(0)
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  sessions Session[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// ─── Respondent session ──────────────────────────────────────────────
+
+model Session {
+  id           String       @id @default(uuid())
+  accessCodeId String?
+  accessCode   AccessCode?  @relation(fields: [accessCodeId], references: [id])
+
+  // Demographics (Name required; the rest optional — see product-spec).
+  name       String?
+  email      String?
+  gender     String?
+  ageBand    String?
+  occupation String?
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  // Computed at submit and frozen for the individual report.
+  //   dimensionScores: { "<dimensionId>": { raw: number, band: string } }
+  dimensionScores Json?
+  totalScore      Int?
+  totalBand       String?
+
+  responses Response[]
+
+  @@index([accessCodeId])
+  @@index([submittedAt])
+}
+
+model Response {
+  id        String @id @default(uuid())
+  sessionId String
+  // 1..35 (matches the item numbers in the booklet).
+  questionId Int
+  // 1..5 Likert (1 = لا أوافق بشدة … 5 = أوافق بشدة).
+  value      Int
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, questionId])
+  @@index([sessionId])
+}
