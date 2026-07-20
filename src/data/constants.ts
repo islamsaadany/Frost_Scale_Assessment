@@ -37,9 +37,10 @@ export const BAND_TEXT_ON: Record<string, string> = {
 };
 
 // Hex equivalents of the band palette, for SVG (spider chart, legend).
+// Kept in sync with tailwind.config.ts `band`.
 export const BAND_HEX: Record<string, string> = {
-  low: "#F5E0C6",
-  mid: "#E7A170",
-  high: "#D9772F",
-  severe: "#5E3418",
+  low: "#F4DEBE",
+  mid: "#EDAF66",
+  high: "#CA6316",
+  severe: "#542D12",
 };
