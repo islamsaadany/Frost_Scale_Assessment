@@ -45,10 +45,13 @@ function PositionBar({ band, fraction }: { band: string; fraction: number }) {
 
 function BandLegend() {
   return (
-    <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+    <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
       {BAND_ORDER.map((b) => (
-        <span key={b} className="flex items-center gap-1.5 text-xs text-ink-soft">
-          <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: BAND_HEX[b] }} />
+        <span key={b} className="flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+          <span
+            className="inline-block h-4 w-4 rounded-full ring-1 ring-black/10"
+            style={{ backgroundColor: BAND_HEX[b] }}
+          />
           {BANDS[b].label}
         </span>
       ))}
@@ -132,38 +135,44 @@ export default async function ReportPage({
         </div>
       </section>
 
-      {/* Profile chart — full width so labels stay large and readable */}
+      {/* Profile: compact list beside the spider */}
       <section className="card mt-6 p-6 sm:p-8">
-        <h2 className="mb-2 text-center text-base font-bold text-ink sm:text-lg">ملفك عبر الأبعاد</h2>
-        <SpiderChart
-          axes={report.dimensions.map((d) => ({
-            label: d.shortName,
-            fraction: d.fraction,
-            band: d.band,
-          }))}
-          size={480}
-        />
-        <BandLegend />
-      </section>
-
-      {/* Compact dimension list */}
-      <section className="card mt-6 p-4 sm:p-6">
-        {report.dimensions.map((d) => (
-          <div
-            key={d.id}
-            className="flex items-center gap-3 border-b border-canvas-muted py-3 last:border-0"
-          >
-            <span className="ltr-nums flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-brand-soft text-xs font-extrabold text-brand-dark">
-              {d.order}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-bold text-ink">{d.shortName}</div>
-              <PositionBar band={d.band} fraction={d.fraction} />
-            </div>
-            <BandChip band={d.band} label={d.bandLabel} />
-            <BigScore raw={d.raw} max={d.max} size="sm" />
+        <h2 className="mb-4 text-center text-base font-bold text-ink sm:text-lg">ملفك عبر الأبعاد</h2>
+        {/* On phones this stacks (spider on top); on iPad/laptop (md+) the
+            spider sits beside the list. */}
+        <div className="grid gap-6 md:grid-cols-2 md:items-center">
+          {/* Spider — first, so it's on top when stacked on mobile */}
+          <div>
+            <SpiderChart
+              axes={report.dimensions.map((d) => ({
+                label: d.shortName,
+                fraction: d.fraction,
+                band: d.band,
+              }))}
+              size={400}
+            />
+            <BandLegend />
           </div>
-        ))}
+          {/* Compact dimension list */}
+          <div>
+            {report.dimensions.map((d) => (
+              <div
+                key={d.id}
+                className="flex items-center gap-3 border-b border-canvas-muted py-3 last:border-0"
+              >
+                <span className="ltr-nums flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-brand-soft text-xs font-extrabold text-brand-dark">
+                  {d.order}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-bold text-ink">{d.shortName}</div>
+                  <PositionBar band={d.band} fraction={d.fraction} />
+                </div>
+                <BandChip band={d.band} label={d.bandLabel} />
+                <BigScore raw={d.raw} max={d.max} size="sm" />
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );
