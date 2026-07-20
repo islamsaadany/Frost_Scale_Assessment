@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: theme("colors.canvas.DEFAULT");
+  color: theme("colors.ink.DEFAULT");
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* RTL numerals still render left-to-right inside their tiles. */
+.ltr-nums {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-canvas-muted bg-canvas-card shadow-sm;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3
+      font-medium text-white transition hover:bg-brand-dark disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl border border-canvas-muted
+      bg-transparent px-5 py-3 font-medium text-ink-soft transition hover:bg-canvas-muted;
+  }
+  .field {
+    @apply w-full rounded-xl border border-canvas-muted bg-white px-4 py-3 text-ink
+      outline-none transition focus:border-brand;
+  }
+}
