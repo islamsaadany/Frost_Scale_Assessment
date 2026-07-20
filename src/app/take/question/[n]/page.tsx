@@ -21,7 +21,8 @@ export default async function QuestionPage({
     <QuestionCard
       position={n}
       total={TOTAL_QUESTIONS}
-      eyebrow={dim.shortName}
+      dimArabic={dim.shortName}
+      dimEnglish={dim.english}
       questionId={question.id}
       questionText={question.text}
     />

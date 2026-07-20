@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LIKERT_OPTIONS } from "@/data/constants";
+import { DimensionPill } from "@/components/DimensionPill";
 import {
   findInFlightSessionId,
   loadCachedAnswers,
@@ -14,7 +15,8 @@ import {
 interface QuestionCardProps {
   position: number;
   total: number;
-  eyebrow: string;
+  dimArabic: string;
+  dimEnglish: string;
   questionId: number;
   questionText: string;
 }
@@ -22,7 +24,8 @@ interface QuestionCardProps {
 export function QuestionCard({
   position,
   total,
-  eyebrow,
+  dimArabic,
+  dimEnglish,
   questionId,
   questionText,
 }: QuestionCardProps) {
@@ -205,12 +208,16 @@ export function QuestionCard({
         </div>
       </div>
 
-      <p className="text-xs font-medium tracking-wide text-brand-dark">{eyebrow}</p>
+      <div className="flex justify-center">
+        <DimensionPill arabic={dimArabic} english={dimEnglish} />
+      </div>
 
-      <h2 className="text-2xl font-bold leading-relaxed text-ink sm:text-3xl">{questionText}</h2>
+      <h2 className="min-h-[4.5rem] text-center text-2xl font-bold leading-relaxed text-ink sm:text-3xl">
+        {questionText}
+      </h2>
 
-      {/* Likert — full-width stacked tiles (labels are long in Arabic). */}
-      <div className="space-y-2">
+      {/* Likert — bubble row like the booklet. Value 1 sits on the right (RTL). */}
+      <div className="flex justify-between gap-1 sm:gap-2">
         {LIKERT_OPTIONS.map((o) => {
           const active = selected === o.value;
           return (
@@ -218,22 +225,26 @@ export function QuestionCard({
               key={o.value}
               onClick={() => onSelect(o.value)}
               disabled={submitting}
-              className={[
-                "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-right transition",
-                active
-                  ? "border-brand bg-brand/10 text-ink"
-                  : "border-canvas-muted bg-white text-ink-soft hover:border-brand-soft hover:bg-canvas-muted",
-              ].join(" ")}
+              className="flex flex-1 flex-col items-center gap-2 rounded-2xl px-1 py-3 transition hover:bg-canvas-muted disabled:opacity-60"
             >
               <span
                 className={[
-                  "ltr-nums inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-                  active ? "bg-brand text-white" : "bg-canvas-muted text-ink-soft",
+                  "ltr-nums flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm font-bold transition sm:h-12 sm:w-12",
+                  active
+                    ? "border-brand bg-brand text-white"
+                    : "border-brand-soft bg-white text-brand-dark",
                 ].join(" ")}
               >
                 {o.value}
               </span>
-              <span className="font-medium">{o.label}</span>
+              <span
+                className={[
+                  "text-center text-[10px] leading-tight sm:text-xs",
+                  active ? "font-bold text-ink" : "text-ink-muted",
+                ].join(" ")}
+              >
+                {o.label}
+              </span>
             </button>
           );
         })}

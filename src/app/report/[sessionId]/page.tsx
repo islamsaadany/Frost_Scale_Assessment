@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { buildReport } from "@/lib/report";
+import { buildReport, TOTAL_BAND_RANGES } from "@/lib/report";
 import { SpiderChart } from "@/components/SpiderChart";
 import { PrintButton } from "@/components/PrintButton";
-import { BrandMark } from "@/components/BrandMark";
+import { BandBar } from "@/components/BandBar";
+import { DimensionPill } from "@/components/DimensionPill";
+import { PageHeader, BrandMark } from "@/components/BrandMark";
 import { BAND_BG, BAND_TEXT_ON } from "@/data/constants";
+import { BANDS } from "@/data/dimensions";
+import { SCORING_NOTES, SCORING_TITLE, TOTAL_LABEL } from "@/data/report-content";
 
 export const metadata = { title: "نتيجتك — مقياس فروست" };
-
-// The report is always fetched fresh (scores are frozen at submit).
 export const dynamic = "force-dynamic";
 
 function BandChip({ band, label }: { band: string; label: string }) {
@@ -17,17 +19,6 @@ function BandChip({ band, label }: { band: string; label: string }) {
     >
       {label}
     </span>
-  );
-}
-
-function ScoreBar({ band, fraction }: { band: string; fraction: number }) {
-  return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-canvas-muted">
-      <div
-        className={`h-full rounded-full ${BAND_BG[band]}`}
-        style={{ width: `${Math.round(fraction * 100)}%` }}
-      />
-    </div>
   );
 }
 
@@ -53,10 +44,8 @@ export default async function ReportPage({
   if (!session || !session.submittedAt) {
     return (
       <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center px-4 text-center">
-        <BrandMark compact />
-        <p className="mt-8 text-sm text-ink-soft">
-          لم نعثر على نتيجة مكتملة لهذه الجلسة.
-        </p>
+        <BrandMark />
+        <p className="mt-8 text-sm text-ink-soft">لم نعثر على نتيجة مكتملة لهذه الجلسة.</p>
         <a href="/" className="btn-ghost mt-6">
           العودة إلى البداية
         </a>
@@ -73,38 +62,41 @@ export default async function ReportPage({
       })
     : "";
 
+  const totalSegs = TOTAL_BAND_RANGES.map((r) => ({
+    band: r.band,
+    label: BANDS[r.band].label,
+    min: r.min,
+    max: r.max,
+  }));
+
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <header className="mb-8 flex flex-col items-center gap-4">
-        <BrandMark compact />
-        <div className="text-center">
-          {report.name && <p className="text-lg font-bold text-ink">{report.name}</p>}
-          {dateStr && <p className="ltr-nums text-xs text-ink-muted">{dateStr}</p>}
+    <main className="mx-auto max-w-3xl px-4 py-8">
+      <header className="mb-8">
+        <PageHeader />
+        <div className="mt-6 flex items-end justify-between">
+          <div>
+            {report.name && <p className="text-lg font-bold text-ink">{report.name}</p>}
+            {dateStr && <p className="ltr-nums text-xs text-ink-muted">{dateStr}</p>}
+          </div>
+          <PrintButton />
         </div>
-        <PrintButton />
       </header>
 
       {/* Total score */}
       <section className="card p-6 sm:p-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-ink">المقياس العام للكمالية</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-ink sm:text-lg">{TOTAL_LABEL}</h2>
           <BandChip band={report.total.band} label={report.total.bandLabel} />
         </div>
-        <p className="ltr-nums mb-2 text-sm text-ink-muted">
+        <p className="ltr-nums mb-3 text-sm text-ink-muted">
           {report.total.raw} / {report.total.max}
         </p>
-        <ScoreBar band={report.total.band} fraction={report.total.fraction} />
-        <p className="mt-4 text-sm leading-relaxed text-ink-soft">{report.total.summary}</p>
-        {report.total.guidance && (
-          <p className="mt-2 rounded-xl bg-canvas-muted p-3 text-sm leading-relaxed text-ink-soft">
-            {report.total.guidance}
-          </p>
-        )}
+        <BandBar bands={totalSegs} activeBand={report.total.band} />
       </section>
 
       {/* Spider chart */}
       <section className="card mt-6 p-6 sm:p-8">
-        <h2 className="mb-4 text-center text-lg font-bold text-ink">ملفك عبر الأبعاد</h2>
+        <h2 className="mb-4 text-center text-base font-bold text-ink sm:text-lg">ملفك عبر الأبعاد</h2>
         <SpiderChart
           axes={report.dimensions.map((d) => ({ label: d.shortName, fraction: d.fraction }))}
         />
@@ -114,35 +106,30 @@ export default async function ReportPage({
       <section className="mt-6 space-y-4">
         {report.dimensions.map((d) => (
           <article key={d.id} className="card p-6">
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-base font-bold text-ink">{d.name}</h3>
-                <p className="text-xs text-ink-muted">
-                  {d.english} · {d.interpretation}
-                </p>
-              </div>
+            <div className="mb-4 flex flex-col items-center gap-2 text-center">
+              <DimensionPill arabic={d.shortName} english={d.english} />
+              <p className="text-xs text-ink-muted">{d.interpretation}</p>
+            </div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="ltr-nums text-sm text-ink-muted">
+                {d.raw} / {d.max}
+              </span>
               <BandChip band={d.band} label={d.bandLabel} />
             </div>
-            <p className="ltr-nums mb-2 text-xs text-ink-muted">
-              {d.raw} / {d.max}
-            </p>
-            <ScoreBar band={d.band} fraction={d.fraction} />
-            <p className="mt-3 text-xs leading-relaxed text-ink-muted">{d.intro}</p>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">{d.summary}</p>
-            {d.guidance && (
-              <p className="mt-2 rounded-xl bg-canvas-muted p-3 text-sm leading-relaxed text-ink-soft">
-                {d.guidance}
-              </p>
-            )}
+            <BandBar bands={d.bands} activeBand={d.band} />
           </article>
         ))}
       </section>
 
-      <footer className="mt-8">
-        <p className="rounded-xl border border-canvas-muted bg-white p-4 text-center text-xs leading-relaxed text-ink-muted">
-          {report.disclaimer}
-        </p>
-      </footer>
+      {/* Scoring key — verbatim from the booklet */}
+      <section className="card mt-6 bg-canvas-muted/60 p-6">
+        <h2 className="mb-3 text-base font-bold text-ink">{SCORING_TITLE}</h2>
+        <ul className="list-inside list-disc space-y-2 text-sm leading-relaxed text-ink-soft">
+          {SCORING_NOTES.map((note, i) => (
+            <li key={i}>{note}</li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

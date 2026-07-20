@@ -8,16 +8,34 @@ export interface SpiderAxis {
 
 // A dependency-free radar/spider chart. Renders N axes evenly around a
 // circle, with concentric grid rings and a filled value polygon.
+// Split a long Arabic label into at most two balanced lines so wide names
+// (e.g. "الشكوك بشأن التصرفات") don't collide with their neighbours.
+function wrapLabel(label: string): string[] {
+  const words = label.split(" ");
+  if (words.length < 2 || label.length <= 10) return [label];
+  let best = 1;
+  let bestDiff = Infinity;
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(" ").length;
+    const b = words.slice(i).join(" ").length;
+    if (Math.abs(a - b) < bestDiff) {
+      bestDiff = Math.abs(a - b);
+      best = i;
+    }
+  }
+  return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
+}
+
 export function SpiderChart({
   axes,
-  size = 320,
+  size = 340,
 }: {
   axes: SpiderAxis[];
   size?: number;
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  const radius = size / 2 - 56; // leave room for labels
+  const radius = size / 2 - 78; // leave room for wrapped labels
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -70,22 +88,28 @@ export function SpiderChart({
         return <circle key={i} cx={x} cy={y} r={3.5} fill="#B96C34" />;
       })}
 
-      {/* Labels */}
+      {/* Labels (wrapped to ≤2 lines, pushed outside the grid) */}
       {axes.map((ax, i) => {
-        const [x, y] = point(i, 1.16);
-        const anchor = Math.abs(x - cx) < 8 ? "middle" : x > cx ? "start" : "end";
+        const [x, y] = point(i, 1.14);
+        const anchor = Math.abs(x - cx) < 10 ? "middle" : x > cx ? "start" : "end";
+        const lines = wrapLabel(ax.label);
+        const y0 = y - ((lines.length - 1) * 12) / 2;
         return (
           <text
             key={i}
             x={x}
-            y={y}
+            y={y0}
             textAnchor={anchor}
             dominantBaseline="middle"
-            fontSize={11}
+            fontSize={10.5}
             fill="#5A5149"
-            fontWeight={600}
+            fontWeight={700}
           >
-            {ax.label}
+            {lines.map((ln, li) => (
+              <tspan key={li} x={x} dy={li === 0 ? 0 : 12}>
+                {ln}
+              </tspan>
+            ))}
           </text>
         );
       })}

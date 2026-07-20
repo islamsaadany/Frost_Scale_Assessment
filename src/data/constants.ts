@@ -19,6 +19,7 @@ export const LIKERT_VALUES = LIKERT_OPTIONS.map((o) => o.value);
 export const SCALE_TITLE = "مقياس فروست";
 export const SCALE_SUBTITLE = "متعدد الأبعاد لقياس الكمالية ومتابعتها";
 export const SCALE_AUTHOR = "د. عماد رشاد عثمان";
+export const SCALE_WEBSITE = "emadrashad.net";
 
 // Tailwind class per band, for bars / chips.
 export const BAND_BG: Record<string, string> = {

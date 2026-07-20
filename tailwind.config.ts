@@ -9,25 +9,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Sampled directly from the booklet.
         canvas: {
-          DEFAULT: "#F6EFE4", // cream page
-          muted: "#EDE3D3",
+          DEFAULT: "#F7F2EC", // cream page
+          muted: "#EBE0CE", // Likert header / pill track beige
           card: "#FFFFFF",
         },
+        cover: {
+          DEFAULT: "#14150F", // near-black cover background
+          soft: "#20211A",
+        },
         ink: {
-          DEFAULT: "#2A2521", // near-black charcoal
+          DEFAULT: "#2A2521", // charcoal text
           soft: "#5A5149",
           muted: "#8A7F73",
         },
         brand: {
-          DEFAULT: "#D9884A", // terracotta / orange accent
-          soft: "#E7A876",
+          DEFAULT: "#DF803E", // orange (title + header pills)
+          soft: "#E7A170", // lighter bubble orange
           dark: "#B96C34",
         },
         // Score bands: منخفض / متوسط / عالية / مرضية شديدة
         band: {
-          low: "#F3D9BE",
-          mid: "#E7A876",
+          low: "#F5E0C6",
+          mid: "#E7A170",
           high: "#D9772F",
           severe: "#5E3418",
         },

@@ -1,18 +1,16 @@
-// Builds the fully-resolved individual report from a stored session.
-// Pure data assembly — no DB, no React — so it can be unit-checked and
-// reused by both the report page and (later) a PDF/email exporter.
+// Builds the individual report from a stored session. Pure data assembly.
+// Interpretive text is limited to what the booklet prints (dimension
+// label + band label + the raw score); no invented narrative.
 
 import {
   BANDS,
   DIMENSIONS,
-  TOTAL_BANDS,
   TOTAL_MAX,
   TOTAL_MIN,
   bandForRaw,
   type BandId,
   type DimensionId,
 } from "@/data/dimensions";
-import { DIMENSION_REPORT, DISCLAIMER, TOTAL_REPORT } from "@/data/report-content";
 import { computeScores } from "@/lib/scoring";
 
 export interface ReportDimension {
@@ -27,9 +25,7 @@ export interface ReportDimension {
   fraction: number;
   band: BandId;
   bandLabel: string;
-  intro: string;
-  summary: string;
-  guidance?: string;
+  bands: { band: BandId; label: string; min: number; max: number }[];
 }
 
 export interface ReportData {
@@ -42,11 +38,8 @@ export interface ReportData {
     fraction: number;
     band: BandId;
     bandLabel: string;
-    summary: string;
-    guidance?: string;
   };
   dimensions: ReportDimension[];
-  disclaimer: string;
 }
 
 interface StoredSession {
@@ -58,8 +51,14 @@ interface StoredSession {
   responses: { questionId: number; value: number }[];
 }
 
+const TOTAL_BAND_RANGES = [
+  { band: "low" as BandId, min: 35, max: 70 },
+  { band: "mid" as BandId, min: 71, max: 105 },
+  { band: "high" as BandId, min: 106, max: 155 },
+  { band: "severe" as BandId, min: 156, max: 175 },
+];
+
 export function buildReport(session: StoredSession): ReportData {
-  // Prefer frozen scores; recompute from raw responses if absent.
   let scores = session.dimensionScores as
     | Record<DimensionId, { raw: number; band: BandId }>
     | null;
@@ -80,7 +79,6 @@ export function buildReport(session: StoredSession): ReportData {
     const band = scores![dim.id]?.band ?? bandForRaw(raw, dim.bands);
     const span = dim.max - dim.min || 1;
     const fraction = Math.min(1, Math.max(0, (raw - dim.min) / span));
-    const copy = DIMENSION_REPORT[dim.id];
     return {
       id: dim.id,
       name: dim.name,
@@ -93,15 +91,17 @@ export function buildReport(session: StoredSession): ReportData {
       fraction,
       band,
       bandLabel: BANDS[band].label,
-      intro: copy.intro,
-      summary: copy.bands[band].summary,
-      guidance: copy.bands[band].guidance,
+      bands: dim.bands.map((b) => ({
+        band: b.band,
+        label: BANDS[b.band].label,
+        min: b.min,
+        max: b.max,
+      })),
     };
   });
 
   const totalSpan = TOTAL_MAX - TOTAL_MIN || 1;
   const totalFraction = Math.min(1, Math.max(0, (total - TOTAL_MIN) / totalSpan));
-  const totalCopy = TOTAL_REPORT[totalBand];
 
   return {
     name: session.name,
@@ -113,12 +113,9 @@ export function buildReport(session: StoredSession): ReportData {
       fraction: totalFraction,
       band: totalBand,
       bandLabel: BANDS[totalBand].label,
-      summary: totalCopy.summary,
-      guidance: totalCopy.guidance,
     },
     dimensions,
-    disclaimer: DISCLAIMER,
   };
 }
 
-export { TOTAL_BANDS };
+export { TOTAL_BAND_RANGES };
