@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/BrandMark";
 import {
@@ -49,6 +50,14 @@ export default function LandingPage() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-cover px-4 py-12 text-white">
+      {/* Subtle admin entry, mirroring the Corporate Endurance landing. */}
+      <Link
+        href="/admin/login"
+        className="absolute left-4 top-4 z-20 text-xs text-white/50 transition hover:text-white/90 sm:left-6 sm:top-6"
+      >
+        دخول المشرف
+      </Link>
+
       {/* Cube artwork from the booklet cover, faded into the dark bg. */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-cover bg-center opacity-40"
