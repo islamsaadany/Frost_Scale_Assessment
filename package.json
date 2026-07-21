@@ -18,10 +18,13 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@sparticuz/chromium": "^131.0.0",
     "bcryptjs": "^2.4.3",
     "next": "^16.0.0",
+    "puppeteer-core": "^23.11.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

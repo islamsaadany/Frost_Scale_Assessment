@@ -14,6 +14,7 @@ export async function GET(
     select: {
       id: true,
       name: true,
+      email: true,
       submittedAt: true,
       responses: { select: { questionId: true, value: true } },
     },
@@ -30,6 +31,7 @@ export async function GET(
     session: {
       id: session.id,
       name: session.name,
+      email: session.email,
       submittedAt: session.submittedAt,
     },
     answersByQuestionId,
