@@ -67,7 +67,7 @@ export function ReportView({ report }: { report: ReportData }) {
   }));
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="pt-safe mx-auto max-w-5xl px-4 pb-8">
       <header className="mb-6">
         <PageHeader />
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
@@ -119,7 +119,9 @@ export function ReportView({ report }: { report: ReportData }) {
                   {d.order}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-bold text-ink sm:text-base">{d.shortName}</div>
+                  <div className="text-sm font-bold leading-snug text-ink sm:text-base">
+                    {d.shortName}
+                  </div>
                   {positionBar(d.band, d.fraction)}
                 </div>
                 {chip(d.band, d.bandLabel)}

@@ -8,9 +8,13 @@ export function DimensionPill({
   english?: string;
 }) {
   return (
-    <div className="inline-flex flex-col items-center rounded-2xl bg-brand px-5 py-2 text-center shadow-sm">
-      <span className="text-sm font-extrabold leading-tight text-white sm:text-base">{arabic}</span>
-      {english && <span className="text-[11px] font-medium text-white/85">{english}</span>}
+    <div className="inline-flex flex-col items-center rounded-2xl bg-brand px-3 py-1 text-center shadow-sm sm:px-5 sm:py-2">
+      <span className="text-xs font-extrabold leading-tight text-white sm:text-base">{arabic}</span>
+      {/* English subtitle only on wider screens, so the mobile pill stays
+          narrow enough for the whole rail to fit on one line. */}
+      {english && (
+        <span className="hidden text-[11px] font-medium text-white/85 sm:block">{english}</span>
+      )}
     </div>
   );
 }

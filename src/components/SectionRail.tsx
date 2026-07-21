@@ -7,7 +7,7 @@ import { DimensionPill } from "@/components/DimensionPill";
 export function SectionRail({ activeId }: { activeId: DimensionId }) {
   const activeOrder = DIMENSIONS_BY_ID[activeId].order;
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
       {DIMENSIONS.map((d) => {
         if (d.id === activeId) {
           return <DimensionPill key={d.id} arabic={d.shortName} english={d.english} />;
@@ -18,7 +18,7 @@ export function SectionRail({ activeId }: { activeId: DimensionId }) {
             key={d.id}
             title={d.shortName}
             className={
-              "ltr-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition " +
+              "ltr-nums flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold transition sm:h-6 sm:w-6 sm:text-xs " +
               (done ? "bg-brand/15 text-brand-dark" : "bg-canvas-muted text-ink-muted")
             }
           >
