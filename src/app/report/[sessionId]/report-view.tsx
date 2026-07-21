@@ -7,7 +7,13 @@ import { BAND_ORDER, BANDS } from "@/data/dimensions";
 import { TOTAL_LABEL } from "@/data/report-content";
 import { TOTAL_BAND_RANGES, type ReportData } from "@/lib/report";
 
-export function ReportView({ report }: { report: ReportData }) {
+export function ReportView({
+  report,
+  pdfMode = false,
+}: {
+  report: ReportData;
+  pdfMode?: boolean;
+}) {
   const colors = BAND_PALETTES.severity;
 
   const chip = (band: string, label: string) => (
@@ -75,7 +81,7 @@ export function ReportView({ report }: { report: ReportData }) {
             {report.name && <p className="text-lg font-bold text-ink">{report.name}</p>}
             {dateStr && <p className="ltr-nums text-xs text-ink-muted">{dateStr}</p>}
           </div>
-          <PrintButton />
+          {!pdfMode && <PrintButton />}
         </div>
       </header>
 

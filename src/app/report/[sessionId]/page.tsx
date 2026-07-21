@@ -8,10 +8,14 @@ export const dynamic = "force-dynamic";
 
 export default async function ReportPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ sessionId: string }>;
+  searchParams: Promise<{ pdf?: string }>;
 }) {
   const { sessionId } = await params;
+  const { pdf } = await searchParams;
+  const pdfMode = pdf === "1";
 
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
@@ -37,5 +41,5 @@ export default async function ReportPage({
     );
   }
 
-  return <ReportView report={buildReport(session)} />;
+  return <ReportView report={buildReport(session)} pdfMode={pdfMode} />;
 }

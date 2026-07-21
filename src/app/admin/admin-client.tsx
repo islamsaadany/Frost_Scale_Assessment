@@ -87,6 +87,9 @@ export function AdminClient() {
       <header className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-ink">لوحة الإدارة</h1>
         <div className="flex items-center gap-3">
+          <a href="/admin/analytics" className="btn-ghost">
+            التحليلات
+          </a>
           <a href="/admin/settings" className="btn-ghost">
             الإعدادات
           </a>
