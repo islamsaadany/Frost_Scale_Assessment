@@ -210,8 +210,9 @@ export function QuestionCard({
       <SectionRail activeId={activeDimension} />
 
       {/* Fixed-height, vertically-centered so the rating below never shifts
-          between questions, regardless of how many lines the text takes. */}
-      <div className="flex h-40 items-center justify-center sm:h-44">
+          between questions, regardless of how many lines the text takes.
+          Height is the minimum that fits the longest (3-line) question. */}
+      <div className="flex h-36 items-center justify-center sm:h-40">
         <h2 className="text-center text-2xl font-bold leading-relaxed text-ink sm:text-3xl">
           {questionText}
         </h2>

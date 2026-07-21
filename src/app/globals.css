@@ -23,6 +23,11 @@ body {
   unicode-bidi: isolate;
 }
 
+/* Clear the phone status bar / notch on edge-to-edge mobile browsers. */
+.pt-safe {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
+}
+
 @layer components {
   .card {
     @apply rounded-2xl border border-canvas-muted bg-canvas-card shadow-sm;

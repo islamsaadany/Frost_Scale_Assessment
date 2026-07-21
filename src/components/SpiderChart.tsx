@@ -10,24 +10,6 @@ export interface SpiderAxis {
   band?: BandId;
 }
 
-// Split a long Arabic label into at most two balanced lines so wide names
-// (e.g. "الشكوك بشأن التصرفات") don't collide with their neighbours.
-function wrapLabel(label: string): string[] {
-  const words = label.split(" ");
-  if (words.length < 2 || label.length <= 10) return [label];
-  let best = 1;
-  let bestDiff = Infinity;
-  for (let i = 1; i < words.length; i++) {
-    const a = words.slice(0, i).join(" ").length;
-    const b = words.slice(i).join(" ").length;
-    if (Math.abs(a - b) < bestDiff) {
-      bestDiff = Math.abs(a - b);
-      best = i;
-    }
-  }
-  return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
-}
-
 export function SpiderChart({
   axes,
   size = 440,
@@ -39,11 +21,13 @@ export function SpiderChart({
 }) {
   const cx = size / 2;
   const cy = size / 2;
-  // Margins scale with size so labels stay well outside the grid at any
-  // size — even when a vertex sits on the outer ring (fraction 1.0).
-  const margin = Math.round(size * 0.32);
-  const radius = size / 2 - margin;
-  const labelGap = Math.round(size * 0.1);
+  // Small grid + generous margin so labels sit clearly outside, even when a
+  // vertex reaches the outer ring.
+  const radius = size / 2 - Math.round(size * 0.33);
+  const labelGap = Math.round(size * 0.13);
+  const boxW = Math.round(size * 0.24);
+  const boxH = Math.round(size * 0.13);
+  const fontSize = Math.max(10, Math.round(size * 0.026));
   const n = axes.length;
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -52,8 +36,6 @@ export function SpiderChart({
     const a = angleFor(i);
     return [cx + Math.cos(a) * radius * r, cy + Math.sin(a) * radius * r] as const;
   };
-  // Labels sit a fixed gap OUTSIDE the outer ring so they never touch the
-  // grid or the value polygon.
   const labelPoint = (i: number) => {
     const a = angleFor(i);
     const r = radius + labelGap;
@@ -97,7 +79,7 @@ export function SpiderChart({
       {/* Value polygon */}
       <polygon points={valuePoints} fill="#D9884A" fillOpacity={0.22} stroke="#B96C34" strokeWidth={2} />
 
-      {/* Vertices — colored by band so highs/severes pop */}
+      {/* Vertices — colored by band */}
       {axes.map((ax, i) => {
         const [x, y] = point(i, Math.max(0.04, ax.fraction));
         const fill = ax.band ? colors[ax.band] : "#B96C34";
@@ -106,33 +88,38 @@ export function SpiderChart({
         );
       })}
 
-      {/* Labels — placed outside the grid. Multi-line labels are anchored
-          away from the centre (up above the chart, down below it) so their
-          inner line never reaches back toward the vertices. */}
+      {/* Labels via foreignObject — real HTML text so Arabic shapes and
+          wraps correctly on every browser (SVG <tspan> mis-renders RTL
+          Arabic on Safari/iOS). */}
       {axes.map((ax, i) => {
         const [x, y] = labelPoint(i);
-        const anchor = Math.abs(x - cx) < 12 ? "middle" : x > cx ? "start" : "end";
-        const lines = wrapLabel(ax.label);
-        const lineH = 13;
-        const extra = (lines.length - 1) * lineH;
-        const y0 = y < cy - 6 ? y - extra : y > cy + 6 ? y : y - extra / 2;
         return (
-          <text
+          <foreignObject
             key={i}
-            x={x}
-            y={y0}
-            textAnchor={anchor}
-            dominantBaseline="middle"
-            fontSize={12}
-            fill="#5A5149"
-            fontWeight={700}
+            x={x - boxW / 2}
+            y={y - boxH / 2}
+            width={boxW}
+            height={boxH}
+            style={{ overflow: "visible" }}
           >
-            {lines.map((ln, li) => (
-              <tspan key={li} x={x} dy={li === 0 ? 0 : 13}>
-                {ln}
-              </tspan>
-            ))}
-          </text>
+            <div
+              dir="rtl"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                textAlign: "center",
+                lineHeight: 1.15,
+                fontSize,
+                fontWeight: 700,
+                fontFamily: "inherit",
+                color: "#5A5149",
+              }}
+            >
+              {ax.label}
+            </div>
+          </foreignObject>
         );
       })}
     </svg>
