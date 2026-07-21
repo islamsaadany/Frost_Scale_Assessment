@@ -35,6 +35,7 @@ export function AdminClient() {
   const [description, setDescription] = useState("");
   const [maxUses, setMaxUses] = useState(1);
   const [creating, setCreating] = useState(false);
+  const [mail, setMail] = useState<Record<string, "idle" | "sending" | "sent" | "error">>({});
 
   const load = useCallback(async () => {
     const [c, s] = await Promise.all([
@@ -80,6 +81,22 @@ export function AdminClient() {
     await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
     router.refresh();
+  };
+
+  const resend = async (s: SessionRow) => {
+    const to = s.email ?? window.prompt("البريد الإلكتروني للإرسال:") ?? "";
+    if (!to.trim()) return;
+    setMail((m) => ({ ...m, [s.id]: "sending" }));
+    try {
+      const res = await fetch(`/api/admin/sessions/${s.id}/email`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: to.trim() }),
+      });
+      setMail((m) => ({ ...m, [s.id]: res.ok ? "sent" : "error" }));
+    } catch {
+      setMail((m) => ({ ...m, [s.id]: "error" }));
+    }
   };
 
   return (
@@ -220,14 +237,36 @@ export function AdminClient() {
                           : "—"}
                       </td>
                       <td className="py-2">
-                        <a
-                          href={`/report/${s.id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs text-brand-dark hover:underline"
-                        >
-                          عرض التقرير
-                        </a>
+                        <div className="flex items-center gap-3">
+                          <a
+                            href={`/report/${s.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-brand-dark hover:underline"
+                          >
+                            عرض التقرير
+                          </a>
+                          <button
+                            onClick={() => resend(s)}
+                            disabled={mail[s.id] === "sending"}
+                            className={
+                              "text-xs hover:underline " +
+                              (mail[s.id] === "sent"
+                                ? "text-ink-muted"
+                                : mail[s.id] === "error"
+                                  ? "text-band-severe"
+                                  : "text-brand-dark")
+                            }
+                          >
+                            {mail[s.id] === "sending"
+                              ? "جارٍ الإرسال…"
+                              : mail[s.id] === "sent"
+                                ? "تم الإرسال ✓"
+                                : mail[s.id] === "error"
+                                  ? "فشل — إعادة"
+                                  : "إرسال PDF"}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
